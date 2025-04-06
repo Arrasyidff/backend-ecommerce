@@ -1,5 +1,5 @@
 {
-  "name": "typescript-project-root",
+  "name": "backend-ecommerce",
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
