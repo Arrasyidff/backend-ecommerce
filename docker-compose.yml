@@ -1,119 +1,56 @@
-version: '3.8'
-
 services:
-  web1:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.dev
-    container_name: backend-app-1
-    restart: unless-stopped
-    ports:
-      - "3001:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+  postgres:
+    container_name: postgres
+    image: postgres:14-alpine
+    restart: always
     environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - MONGO_URI=mongodb://mongo:27017/mydatabase
-      - JWT_SECRET=your_jwt_secret_key
-      - JWT_EXPIRES_IN=90d
-      - APP_NAME=web1
-    depends_on:
-      - mongo
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-app_db}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
 
-  web2:
+  api:
+    platform: linux/amd64  # Jika Anda menggunakan Mac dengan Apple Silicon
     build:
       context: .
-      dockerfile: docker/Dockerfile.dev
-    container_name: backend-app-2
-    restart: unless-stopped
-    ports:
-      - "3002:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      dockerfile: docker/Dockerfile
+    restart: always
     environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - MONGO_URI=mongodb://mongo:27017/mydatabase
-      - JWT_SECRET=your_jwt_secret_key
-      - JWT_EXPIRES_IN=90d
-      - APP_NAME=web2
-    depends_on:
-      - mongo
-    networks:
-      - app-network
-
-  web3:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.dev
-    container_name: backend-app-3
-    restart: unless-stopped
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-app_db}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "3003:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - MONGO_URI=mongodb://mongo:27017/mydatabase
-      - JWT_SECRET=your_jwt_secret_key
-      - JWT_EXPIRES_IN=90d
-      - APP_NAME=web3
+      - "${PORT:-3000}:3000"
     depends_on:
-      - mongo
+      - postgres
     networks:
       - app-network
 
   nginx:
-    image: nginx:alpine
-    container_name: nginx-load-balancer
-    volumes:
-      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+    container_name: nginx
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    restart: always
     ports:
       - "8081:80"
     depends_on:
-      - web1
-      - web2
-      - web3
+      - api
     networks:
       - app-network
-
-  mongo:
-    image: mongo:latest
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27033:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - app-network
-
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    restart: unless-stopped
-    ports:
-      - "8082:8081"
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongo
-      - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=password
-    depends_on:
-      - mongo
-    networks:
-      - app-network
-
-volumes:
-  mongo-data:
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:

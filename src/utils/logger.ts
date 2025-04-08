@@ -1,39 +1,34 @@
 import winston from 'winston';
-import { config } from '../config/env';
+import { config } from '../config';
 
-// Define log format
-const logFormat = winston.format.printf(({ level, message, timestamp }) => {
-  return `${timestamp} ${level}: ${message}`;
+const { combine, timestamp, printf, colorize } = winston.format;
+
+const logFormat = printf(({ level, message, timestamp }) => {
+  return `[${timestamp}] ${level}: ${message}`;
 });
 
-// Create logger instance
-export const logger = winston.createLogger({
-  level: config.logLevel,
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.errors({ stack: true }),
-    winston.format.splat(),
+const logger = winston.createLogger({
+  level: config.logging.level,
+  format: combine(
+    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     logFormat
   ),
-  defaultMeta: { service: 'my-backend-api' },
   transports: [
-    // Console transport for all environments
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
+      format: combine(
+        colorize(),
+        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         logFormat
       ),
+    }),
+    new winston.transports.File({ 
+      filename: 'logs/error.log', 
+      level: 'error' 
+    }),
+    new winston.transports.File({ 
+      filename: 'logs/combined.log' 
     }),
   ],
 });
 
-// Add file transports in production
-if (config.nodeEnv === 'production') {
-  // Log to files in production
-  logger.add(
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' })
-  );
-  logger.add(
-    new winston.transports.File({ filename: 'logs/combined.log' })
-  );
-}
+export default logger;

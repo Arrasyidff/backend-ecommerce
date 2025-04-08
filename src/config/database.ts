@@ -1,45 +1,10 @@
-import mongoose from 'mongoose';
-import { config } from './env';
-import { logger } from '../utils';
+import { PrismaClient } from '@prisma/client';
+import { environmentConfig } from './environment';
 
-export const connectDB = async (): Promise<void> => {
-  try {
-    const conn = await mongoose.connect(config.mongoUri);
-    
-    logger.info(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Log whenever MongoDB emits events
-    mongoose.connection.on('error', (err) => {
-      logger.error(`MongoDB connection error: ${err}`);
-    });
-    
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected');
-    });
-    
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected');
-    });
-    
-    // Handle process termination gracefully
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      logger.info('MongoDB connection closed due to app termination');
-      process.exit(0);
-    });
-    
-  } catch (error) {
-    logger.error(`Error connecting to MongoDB: ${error}`);
-    process.exit(1);
-  }
-};
+export const prisma = new PrismaClient({
+  log: environmentConfig.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
 
-export const disconnectDB = async (): Promise<void> => {
-  try {
-    await mongoose.connection.close();
-    logger.info('MongoDB disconnected');
-  } catch (error) {
-    logger.error(`Error disconnecting from MongoDB: ${error}`);
-    process.exit(1);
-  }
+export const databaseConfig = {
+  url: environmentConfig.DATABASE_URL,
 };

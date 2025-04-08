@@ -1,36 +1,35 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
-import compression from 'compression';
-import { config } from './config';
-import { errorMiddleware } from './middlewares';
+import { errorMiddleware } from './middleware/error.middleware';
+import { loggerMiddleware } from './middleware/logger.middleware';
 import routes from './routes';
 
-// Initialize Express app
-const app: Application = express();
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: config.corsOrigin }));
-app.use(helmet());
-app.use(compression());
-
-// Logging
-if (config.nodeEnv === 'development') {
-  app.use(morgan('dev'));
+class App {
+  public app: Application;
+  
+  constructor() {
+    this.app = express();
+    this.initializeMiddleware();
+    this.initializeRoutes();
+    this.initializeErrorHandling();
+  }
+  
+  private initializeMiddleware(): void {
+    this.app.use(helmet());
+    this.app.use(cors());
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(loggerMiddleware);
+  }
+  
+  private initializeRoutes(): void {
+    this.app.use('/api', routes);
+  }
+  
+  private initializeErrorHandling(): void {
+    this.app.use(errorMiddleware);
+  }
 }
 
-// Health check route
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: `Server is running on ${process.env.APP_NAME}` });
-});
-
-// API Routes
-app.use('/api', routes);
-
-// Error handling middleware
-app.use(errorMiddleware);
-
-export { app };
+export default new App().app;

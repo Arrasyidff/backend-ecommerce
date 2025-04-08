@@ -1,144 +1,68 @@
-# Node.js Express TypeScript Backend
+# TypeScript Express Backend
 
-Backend API menggunakan Node.js, Express, TypeScript, Mongoose, dan validasi dengan Zod.
+A robust backend API built with TypeScript, Express, PostgreSQL, Prisma, and Docker.
 
-## Fitur
+## Features
 
-- 🚀 Node.js & Express
-- 📘 TypeScript
-- 🗄️ MongoDB dengan Mongoose
-- 🔐 Autentikasi JWT
-- 🛡️ Validasi dengan Zod
-- 🐳 Docker & Docker Compose
-- 🧪 Integration Testing
-- 📝 Logging
-- 🔄 Hot-reload development dengan Nodemon
+- **OOP Architecture**: Organized using Object-Oriented Programming principles
+- **TypeScript**: Type-safe code throughout the application
+- **Express**: Fast, unopinionated, minimalist web framework for Node.js
+- **PostgreSQL**: Powerful, open-source relational database
+- **Prisma ORM**: Next-generation ORM for Node.js and TypeScript
+- **Authentication & Authorization**: JWT-based auth system with role-based access control
+- **Error Handling**: Comprehensive error handling middleware
+- **Logging**: Advanced logging with Winston
+- **Docker**: Containerized application with Docker Compose
+- **Nginx**: Reverse proxy for API routing
 
-## Struktur Project
+## Prerequisites
 
-```
-my-backend-app/
-│
-├── src/                          # Source code utama
-│   ├── config/                   # Konfigurasi aplikasi
-│   ├── controllers/              # Controller untuk menangani request
-│   ├── middlewares/              # Middleware aplikasi
-│   ├── models/                   # Model Mongoose
-│   ├── routes/                   # Definisi routes
-│   ├── schemas/                  # Zod validation schemas
-│   ├── services/                 # Business logic
-│   ├── types/                    # Type definitions
-│   ├── utils/                    # Utility functions
-│   ├── app.ts                    # Express app setup
-│   └── server.ts                 # Entry point utama
-│
-├── tests/                        # Test files
-│   ├── integration/              # Integration tests
-│   └── unit/                     # Unit tests
-│
-├── docker/                       # Docker configurations
-├── .env.example                  # Example environment variables
-└── ...                           # Various config files
-```
+- Node.js (v16+)
+- Docker and Docker Compose
+- npm or yarn
 
-## Requirements
+## Getting Started
 
-- Node.js (versi 18+)
-- MongoDB
-- Docker (opsional)
-
-## Instalasi
-
-### Menggunakan npm
+1. Clone the repository
+2. Copy `.env.example` to `.env` and adjust values
+3. Run the application:
 
 ```bash
-# Clone repositori
-git clone https://github.com/username/my-backend-app.git
-cd my-backend-app
-
-# Install dependencies
+# Development mode
 npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run start:dev
 
-# Salin .env.example ke .env dan sesuaikan
-cp .env.example .env
-
-# Jalankan aplikasi di mode development
-npm run dev
-```
-
-### Menggunakan Docker
-
-```bash
-# Clone repositori
-git clone https://github.com/username/my-backend-app.git
-cd my-backend-app
-
-# Salin .env.example ke .env dan sesuaikan
-cp .env.example .env
-
-# Jalankan dengan docker-compose
-docker-compose up
-```
-
-## Penggunaan
-
-Setelah server berjalan, API tersedia di:
-
-```
-http://localhost:3000/api
+# Docker mode
+npm run docker:up
 ```
 
 ## API Endpoints
 
-### Auth
-
-- `POST /api/auth/register` - Register user baru
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Dapatkan profil user saat ini (perlu auth)
-- `POST /api/auth/logout` - Logout user
+### Authentication
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Login and get JWT token
 
 ### Users
+- `GET /api/users/profile` - Get current user profile
+- `GET /api/users` - Get all users (admin only)
 
-- `GET /api/users/profile` - Dapatkan profil user (perlu auth)
-- `PUT /api/users/profile` - Update profil user (perlu auth)
-- `GET /api/users` - Dapatkan semua user (perlu auth admin)
-- `GET /api/users/:id` - Dapatkan user by ID (perlu auth admin)
-- `PUT /api/users/:id` - Update user (perlu auth admin)
-- `DELETE /api/users/:id` - Delete user (perlu auth admin)
+## Project Structure
 
-## Pengujian
-
-```bash
-# Jalankan semua test
-npm test
-
-# Jalankan integration test
-npm run test:integration
-
-# Jalankan test dengan coverage
-npm run test:coverage
+```
+project-root/
+├── src/                            # Source code
+│   ├── api/                        # API modules
+│   ├── config/                     # Configuration
+│   ├── middleware/                 # Global middleware
+│   ├── utils/                      # Utilities
+│   └── ...
+├── prisma/                         # Prisma ORM
+├── docker/                         # Docker configuration
+└── ...
 ```
 
-## Build untuk Production
+## License
 
-```bash
-# Build TypeScript ke JavaScript
-npm run build
-
-# Jalankan aplikasi production
-npm start
-```
-
-## Docker
-
-```bash
-# Development (dengan hot-reload)
-npm run docker:dev
-
-# Build untuk production
-npm run docker:build
-```
-
-## Lisensi
-
-ISC
+MIT
