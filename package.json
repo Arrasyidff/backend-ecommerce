@@ -17,6 +17,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "docker:up": "docker-compose up -d",
+    "docker:up-server": "docker-compose build --no-cache api && docker-compose up -d --no-deps api",
     "docker:down": "docker-compose down",
     "generate:module": "node scripts/generate-module.js"
   },
