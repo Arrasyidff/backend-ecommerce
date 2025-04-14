@@ -1,6 +1,7 @@
 import app from './app';
 import logger from './utils/logger';
 import { config } from './config';
+import './jobs/invoiceWorker';
 
 // Add a simple test endpoint directly to the app
 app.get('/test', (_, res) => {
@@ -25,4 +26,5 @@ const PORT = config.server.port;
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
+  logger.info(`Invoice worker initialized`);
 });
